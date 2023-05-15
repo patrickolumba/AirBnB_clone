@@ -140,7 +140,7 @@ No known bugs at this time.
 
 ## Authors
 Patrick Olumba - [Github](https://github.com/patrickolumba)  
-Ibrahim - [Github](https://github.com/ibrodante)
+Ibrahim Balogun - [Github](https://github.com/ibrodante)
 
 ## License
 Public Domain. No copy write protection. 
