@@ -1,58 +1,54 @@
-#!/usr/bin/pyhon3
-"""
-Parent class that will inherit
-"""
+#!/usr/bin/python3
+"""This script is the base model"""
 import uuid
-from datetime import datetime
+import datetime
 from models import storage
 
 
-class BaseModel:
-    """Defines all common attributes/methods
-    """
+class BaseModel():
+    ''''Class from which all other classes will inherit'''
+
     def __init__(self, *args, **kwargs):
-        """initializes all attributes
-        """
-        if not kwargs:
+        '''Initializes instance attributes'''
+
+        if len(kwargs) == 0:
             self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = self.created_at
+            self.created_at = datetime.datetime.now()
+            self.updated_at = datetime.datetime.now()
             storage.new(self)
         else:
-            f = "%Y-%m-%dT%H:%M:%S.%f"
-            for key, value in kwargs.items():
-                if key == 'created_at' or key == 'updated_at':
-                    value = datetime.strptime(kwargs[key], f)
-                if key != '__class__':
-                    setattr(self, key, value)
+            for key in kwargs.keys():
+                # check and escape the __class__ key
+                if key == "__class__":
+                    continue
+                else:
+                    # check and change the format for updated_at & created_at
+                    if key == "updated_at" or key == "created_at":
+                        kwargs[key] = datetime.datetime.strptime(
+                            kwargs[key], "%Y-%m-%dT%H:%M:%S.%f")
+                    # set the attributes of the instance
+                    setattr(self, key, kwargs[key])
+                # self.key = kwargs[key]
+                # print(f"{key}: {kwargs[key]}")
 
     def __str__(self):
-        """returns class name, id and attribute dictionary
-        """
-        class_name = "[" + self.__class__.__name__ + "]"
-        dct = {k: v for (k, v) in self.__dict__.items() if (not v) is False}
-        return class_name + " (" + self.id + ") " + str(dct)
+        '''Returns official string representation'''
+        return (f"[{self.__class__.__name__}] ({self.id}) \
+{str(self.__dict__)}")
 
     def save(self):
-        """updates last update time
-        """
-        self.updated_at = datetime.now()
+        '''updates the public instance attribute updated_at'''
         storage.save()
+        self.updated_at = datetime.datetime.now()
 
     def to_dict(self):
-        """creates a new dictionary, adding a key and returning
-        datemtimes converted to strings
-        """
-        new_dict = {}
-
-        for key, values in self.__dict__.items():
-            if key == "created_at" or key == "updated_at":
-                new_dict[key] = values.strftime("%Y-%m-%dT%H:%M:%S.%f")
+        '''returns a dictionary containing all keys/values of __dict__'''
+        object_dict = {}
+        for key in self.__dict__.keys():
+            if key not in ('created_at', 'updated_at'):
+                object_dict[key] = self.__dict__[key]
             else:
-                if not values:
-                    pass
-                else:
-                    new_dict[key] = values
-        new_dict['__class__'] = self.__class__.__name__
-
-        return new_dict
+                object_dict[key] = datetime.datetime.isoformat(
+                    self.__dict__[key])
+        object_dict['__class__'] = self.__class__.__name__
+        return (object_dict)
